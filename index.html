@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sport Zone</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f5;
+      --surface: #ffffff;
+      --accent: #e63c00;
+      --accent-dark: #b52d00;
+      --accent-light: #fff0eb;
+      --text: #111111;
+      --muted: #666666;
+      --border: #e0e0e0;
+      --shadow: 0 2px 16px rgba(0,0,0,0.07);
+      --shadow-hover: 0 10px 40px rgba(0,0,0,0.13);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #111;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      color: white;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .cart-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 9px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .cart-btn:hover { background: var(--accent-dark); }
+
+    .cart-count {
+      background: white;
+      color: var(--accent);
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: #111;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 5rem 2rem 4.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "⚽";
+      position: absolute;
+      font-size: 18rem;
+      opacity: 0.04;
+      top: -3rem;
+      right: -2rem;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      background: var(--accent);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 50px;
+      margin-bottom: 1.25rem;
+      display: inline-block;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      letter-spacing: 3px;
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 1.05rem;
+      opacity: 0.7;
+      max-width: 420px;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      text-align: center;
+      padding: 3.5rem 2rem 2rem;
+    }
+
+    .section-title h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2.4rem;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin-bottom: 0.3rem;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ── GRID ── */
+    .container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.75rem;
+      padding: 0 2rem 5rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── CARD ── */
+    .produto {
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .produto:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .produto-img {
+      width: 100%;
+      aspect-ratio: 1;
+      overflow: hidden;
+      background: #f9f9f9;
+    }
+
+    .produto-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .produto:hover .produto-img img {
+      transform: scale(1.05);
+    }
+
+    .produto-info {
+      padding: 1.2rem 1.4rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 50px;
+      margin-bottom: 0.75rem;
+    }
+
+    .produto h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text);
+    }
+
+    .produto p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.55;
+      flex: 1;
+      margin-bottom: 1.1rem;
+    }
+
+    .produto-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .preco {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .produto button {
+      background: var(--text);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      padding: 10px 22px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    }
+
+    .produto button:hover { background: var(--accent); }
+    .produto button:active { transform: scale(0.96); }
+    .produto button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(120px);
+      background: #111;
+      color: white;
+      padding: 14px 28px;
+      border-radius: 50px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 999;
+      white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid #222;
+      background: #111;
+      color: #555;
+      font-size: 0.85rem;
+    }
+
+    footer span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a class="logo" href="index.html">Sport<span>Zone</span></a>
+    <a class="cart-btn" href="carrinho.html">
+      🛒 Carrinho <span class="cart-count" id="cartCount">0</span>
+    </a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-badge">🏆 Equipamentos Esportivos</div>
+    <h1>Jogue no <span>Seu Melhor</span></h1>
+    <p>Produtos esportivos de qualidade para futebol, tênis e muito mais.</p>
+  </section>
+
+  <div class="section-title">
+    <h2>Nossos Produtos</h2>
+    <p>Equipamentos para elevar o seu jogo</p>
+  </div>
+
+  <div class="container">
+
+    <!-- BOLA DE FUTEBOL -->
+    <div class="produto">
+      <div class="produto-img">
+        <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=400&h=400&fit=crop" alt="Bola de Futebol">
+      </div>
+      <div class="produto-info">
+        <span class="badge">⚽ Futebol</span>
+        <h2>Bola de Futebol</h2>
+        <p>Bola oficial de campo com costura reforçada e excelente toque. Ideal para treinos e partidas.</p>
+        <div class="produto-footer">
+          <span class="preco">R$ 89,90</span>
+          <button id="botaoBola">Comprar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHUTEIRA -->
+    <div class="produto">
+      <div class="produto-img">
+        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop" alt="Chuteira">
+      </div>
+      <div class="produto-info">
+        <span class="badge">👟 Futebol</span>
+        <h2>Chuteira</h2>
+        <p>Chuteira profissional com solado de alta tração, conforto e durabilidade para todas as superfícies.</p>
+        <div class="produto-footer">
+          <span class="preco">R$ 199,90</span>
+          <button id="botaoChuteira">Comprar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RAQUETE DE TÊNIS -->
+    <div class="produto">
+      <div class="produto-img">
+        <img src="https://images.unsplash.com/photo-1617083934555-ac7b4d0b4e07?w=400&h=400&fit=crop" alt="Raquete de Tênis">
+      </div>
+      <div class="produto-info">
+        <span class="badge">🎾 Tênis</span>
+        <h2>Raquete de Tênis</h2>
+        <p>Raquete leve com frame de grafite e encordoamento preciso para máximo controle e potência.</p>
+        <div class="produto-footer">
+          <span class="preco">R$ 249,90</span>
+          <button id="botaoRaquete">Comprar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOLA DE TÊNIS -->
+    <div class="produto">
+      <div class="produto-img">
+        <img src="https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=400&h=400&fit=crop" alt="Bola de Tênis">
+      </div>
+      <div class="produto-info">
+        <span class="badge">🎾 Tênis</span>
+        <h2>Bola de Tênis</h2>
+        <p>Pack com 3 bolas pressurizadas, certificadas para uso em quadras de saibro e dura.</p>
+        <div class="produto-footer">
+          <span class="preco">R$ 34,90</span>
+          <button id="botaoBolaTenis">Comprar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <footer>
+    &copy; 2025 <span>SportZone</span> — Todos os direitos reservados.
+  </footer>
+
+  <!-- ✅ Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    // ✅ CONFIGURAÇÃO SUPABASE — variáveis corretas
+    const SUPABASE_URL = "https://uelsmyxiynsbrrmacnac.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+
+    const { createClient } = supabase;
+    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ── TOAST ──
+    const toastEl = document.getElementById("toast");
+    let toastTimer;
+
+    function showToast(msg) {
+      clearTimeout(toastTimer);
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+    }
+
+    // ── CONTADOR DO CARRINHO (busca do Supabase ao carregar a página) ──
+    async function atualizarContador() {
+      try {
+        const { count, error } = await client
+          .from("carrinho")
+          .select("*", { count: "exact", head: true });
+
+        if (!error) {
+          document.getElementById("cartCount").textContent = count ?? 0;
+        }
+      } catch (e) {
+        console.warn("Não foi possível buscar contador:", e);
+      }
+    }
+
+    // ── ADICIONAR AO CARRINHO ──
+    async function addToCart(btn, nome, preco) {
+      btn.disabled = true;
+      btn.textContent = "Adicionando...";
+
+      const { error } = await client
+        .from("carrinho")
+        .insert([{ nome, preco }]);
+
+      if (error) {
+        console.error("Erro ao salvar no carrinho:", error);
+        showToast("❌ Erro ao adicionar. Tente novamente.");
+      } else {
+        showToast("✅ " + nome + " adicionado ao carrinho!");
+        await atualizarContador();
+      }
+
+      btn.disabled = false;
+      btn.textContent = "Comprar";
+    }
+
+    // ── EVENTOS DOS BOTÕES ──
+    document.getElementById("botaoBola")
+      .addEventListener("click", function () {
+        addToCart(this, "Bola de Futebol", 89.90);
+      });
+
+    document.getElementById("botaoChuteira")
+      .addEventListener("click", function () {
+        addToCart(this, "Chuteira", 199.90);
+      });
+
+    document.getElementById("botaoRaquete")
+      .addEventListener("click", function () {
+        addToCart(this, "Raquete de Tênis", 249.90);
+      });
+
+    document.getElementById("botaoBolaTenis")
+      .addEventListener("click", function () {
+        addToCart(this, "Bola de Tênis", 34.90);
+      });
+
+    // ── Carrega contador ao abrir a página ──
+    atualizarContador();
+  </script>
+
+</body>
+</html>
