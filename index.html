@@ -379,11 +379,16 @@
   </footer>
 
   <script>
-    let cartCount = 0;
+    let carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho")) || [];
+  
     const cartCountEl = document.getElementById("cartCount");
     const toast = document.getElementById("toast");
+  
     let toastTimer;
-
+  
+  // agora sim calcula o total
+    let cartCount = carrinhoSalvo.length;
+    cartCountEl.textContent = cartCount;
     function showToast(msg) {
       clearTimeout(toastTimer);
       toast.textContent = msg;
