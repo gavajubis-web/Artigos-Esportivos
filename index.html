@@ -391,22 +391,40 @@
       toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
     }
 
-    function addToCart(nome) {
-      cartCount++;
-      cartCountEl.textContent = cartCount;
-      showToast("✅ " + nome + " adicionado ao carrinho!");
-    }
+    function addToCart(nome, preco) {
 
-    document.getElementById("botaoBola").addEventListener("click", () => addToCart("Bola de Futebol"));
-    document.getElementById("botaoChuteira").addEventListener("click", () => addToCart("Chuteira"));
-    document.getElementById("botaoRaquete").addEventListener("click", () => addToCart("Raquete de Tênis"));
-    document.getElementById("botaoBolaTenis").addEventListener("click", () => addToCart("Bola de Tênis"));
+      let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
 
-    document.getElementById("cartBtn").addEventListener("click", () => {
+      carrinho.push({
+        nome: nome,
+        preco: preco
+  });
 
-  window.location.href = "carrinho.html";
+  localStorage.setItem("carrinho", JSON.stringify(carrinho));
 
-});
+  cartCount++;
+
+  cartCountEl.textContent = cartCount;
+
+  showToast("✅ " + nome + " adicionado ao carrinho!");
+}
+
+document.getElementById("botaoBola")
+  .addEventListener("click", () => addToCart("Bola de Futebol", 89.90));
+
+document.getElementById("botaoChuteira")
+  .addEventListener("click", () => addToCart("Chuteira", 199.90));
+
+document.getElementById("botaoRaquete")
+  .addEventListener("click", () => addToCart("Raquete de Tênis", 249.90));
+
+document.getElementById("botaoBolaTenis")
+  .addEventListener("click", () => addToCart("Bola de Tênis", 34.90));
+
+document.getElementById("cartBtn")
+  .addEventListener("click", () => {
+    window.location.href = "carrinho.html";
+  });
   </script>
 
 </body>
