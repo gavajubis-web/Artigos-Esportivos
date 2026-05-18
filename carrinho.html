@@ -21,13 +21,12 @@
       text-align: center;
       font-family: 'Bebas Neue', sans-serif;
       font-size: 2rem;
-      letter-spacing: 2px;
       color: #e63c00;
     }
 
     .container {
       max-width: 800px;
-      margin: 40px auto;
+      margin: 30px auto;
       padding: 20px;
     }
 
@@ -39,6 +38,17 @@
       border-radius: 8px;
       display: flex;
       justify-content: space-between;
+      align-items: center;
+    }
+
+    .controls button {
+      background: #e63c00;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      margin: 0 3px;
+      border-radius: 5px;
+      cursor: pointer;
     }
 
     .total {
@@ -47,6 +57,31 @@
       color: #e63c00;
       font-weight: bold;
       text-align: right;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .actions button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .clear {
+      background: #444;
+      color: white;
+    }
+
+    .buy {
+      background: #e63c00;
+      color: white;
     }
 
     .vazio {
@@ -59,18 +94,45 @@
 
 <body>
 
-  <header>
-    SEU CARRINHO
-  </header>
+  <header>SEU CARRINHO</header>
 
   <div class="container" id="carrinho"></div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
 
+    function salvar() {
+      localStorage.setItem("carrinho", JSON.stringify(carrinho));
+      render();
+    }
+
+    function mudarQtd(index, valor) {
+      carrinho[index].qtd += valor;
+
+      if (carrinho[index].qtd <= 0) {
+        carrinho.splice(index, 1);
+      }
+
+      salvar();
+    }
+
+    function removerItem(index) {
+      carrinho.splice(index, 1);
+      salvar();
+    }
+
+    function limparCarrinho() {
+      carrinho = [];
+      salvar();
+    }
+
+    function finalizarCompra() {
+      alert("Compra finalizada com sucesso! 🎉");
+      limparCarrinho();
+    }
+
+    function render() {
       const container = document.getElementById("carrinho");
-      const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-
       container.innerHTML = "";
 
       if (carrinho.length === 0) {
@@ -80,15 +142,27 @@
 
       let total = 0;
 
-      carrinho.forEach(item => {
-        total += Number(item.preco);
+      carrinho.forEach((item, index) => {
+
+        if (!item.qtd) item.qtd = 1;
+
+        total += item.preco * item.qtd;
 
         const div = document.createElement("div");
         div.classList.add("item");
 
         div.innerHTML = `
-          <span>${item.nome}</span>
-          <span>R$ ${Number(item.preco).toFixed(2)}</span>
+          <div>
+            <strong>${item.nome}</strong><br>
+            R$ ${item.preco.toFixed(2)}
+          </div>
+
+          <div class="controls">
+            <button onclick="mudarQtd(${index}, -1)">-</button>
+            ${item.qtd}
+            <button onclick="mudarQtd(${index}, 1)">+</button>
+            <button onclick="removerItem(${index})">🗑</button>
+          </div>
         `;
 
         container.appendChild(div);
@@ -100,7 +174,18 @@
 
       container.appendChild(totalDiv);
 
-    });
+      const actions = document.createElement("div");
+      actions.classList.add("actions");
+
+      actions.innerHTML = `
+        <button class="clear" onclick="limparCarrinho()">Limpar carrinho</button>
+        <button class="buy" onclick="finalizarCompra()">Finalizar compra</button>
+      `;
+
+      container.appendChild(actions);
+    }
+
+    render();
   </script>
 
 </body>
