@@ -386,7 +386,8 @@
   const supabaseKey = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO"; 
   // 👉 cole aqui a chave sb_publishable que você pegou
 
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  const { createClient } = supabase;
+  const client = createClient(URL, KEY);
 
   async function addToCart(nome, preco) {
     const { error } = await supabase
