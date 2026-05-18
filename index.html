@@ -403,12 +403,10 @@
     document.getElementById("botaoBolaTenis").addEventListener("click", () => addToCart("Bola de Tênis"));
 
     document.getElementById("cartBtn").addEventListener("click", () => {
-      if (cartCount === 0) {
-        showToast("🛒 Seu carrinho está vazio.");
-      } else {
-        showToast("🛒 Você tem " + cartCount + " item(ns) no carrinho.");
-      }
-    });
+
+  window.location.href = "carrinho.html";
+
+});
   </script>
 
 </body>
