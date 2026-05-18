@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,21 +54,6 @@
       color: #888;
       margin-top: 50px;
     }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      border: none;
-      background: #e63c00;
-      color: white;
-      font-weight: bold;
-      border-radius: 30px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #b52d00;
-    }
   </style>
 </head>
 
@@ -82,64 +66,42 @@
   <div class="container" id="carrinho"></div>
 
   <script>
-    let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-    
-    // elementos da página
-    const cartCountEl = document.getElementById("cartCount");
-    const toast = document.getElementById("toast");
-    let toastTimer;
-    
-    // contador já vem do carrinho salvo
-    let cartCount = carrinho.length;
-    cartCountEl.textContent = cartCount;
-    
-    // toast
-    function showToast(msg) {
-      clearTimeout(toastTimer);
-      toast.textContent = msg;
-      toast.classList.add("show");
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
-    }
-    
-    // adicionar produto no carrinho
-    function addToCart(nome, preco) {
-    
-      let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-    
-      carrinho.push({
-        nome: nome,
-        preco: preco
-    });
-  
-    localStorage.setItem("carrinho", JSON.stringify(carrinho));
-  
-    // atualiza contador corretamente
-    cartCount = carrinho.length;
-    cartCountEl.textContent = cartCount;
-  
-    showToast("✅ " + nome + " adicionado ao carrinho!");
-  }
-  
-  // botões de produtos
-  document.getElementById("botaoBola")
-    .addEventListener("click", () => addToCart("Bola de Futebol", 89.90));
-  
-  document.getElementById("botaoChuteira")
-    .addEventListener("click", () => addToCart("Chuteira", 199.90));
-  
-  document.getElementById("botaoRaquete")
-    .addEventListener("click", () => addToCart("Raquete de Tênis", 249.90));
-  
-  document.getElementById("botaoBolaTenis")
-    .addEventListener("click", () => addToCart("Bola de Tênis", 34.90));
-  
-  // botão carrinho abre página
-  document.getElementById("cartBtn")
-    .addEventListener("click", () => {
-      window.location.href = "carrinho.html";
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const container = document.getElementById("carrinho");
+      const carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+
+      container.innerHTML = "";
+
+      if (carrinho.length === 0) {
+        container.innerHTML = "<p class='vazio'>Seu carrinho está vazio 🛒</p>";
+        return;
+      }
+
+      let total = 0;
+
+      carrinho.forEach(item => {
+        total += Number(item.preco);
+
+        const div = document.createElement("div");
+        div.classList.add("item");
+
+        div.innerHTML = `
+          <span>${item.nome}</span>
+          <span>R$ ${Number(item.preco).toFixed(2)}</span>
+        `;
+
+        container.appendChild(div);
+      });
+
+      const totalDiv = document.createElement("div");
+      totalDiv.classList.add("total");
+      totalDiv.innerText = "Total: R$ " + total.toFixed(2);
+
+      container.appendChild(totalDiv);
+
     });
   </script>
 
 </body>
-
 </html>
