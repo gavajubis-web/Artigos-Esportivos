@@ -45,9 +45,9 @@
       background: #e63c00;
       border: none;
       color: white;
-      padding: 5px 10px;
-      margin: 0 3px;
-      border-radius: 5px;
+      padding: 6px 10px;
+      margin-left: 5px;
+      border-radius: 6px;
       cursor: pointer;
     }
 
@@ -98,107 +98,108 @@
 
   <div class="container" id="carrinho"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script>
-  const supabaseUrl = "https://uelsmyxiynsbrrmacnac.supabase.co";
-  const supabaseKey = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+  <script>
+    // 🔥 CONFIG SUPABASE
+    const supabaseUrl = "https://uelsmyxiynsbrrmacnac.supabase.co";
+    const supabaseKey = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
 
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    const { createClient } = supabase;
+    const client = createClient(supabaseUrl, supabaseKey);
 
-  const container = document.getElementById("carrinho");
+    const container = document.getElementById("carrinho");
 
-  // 🔥 carregar carrinho do banco
-  async function carregarCarrinho() {
-    const { data, error } = await supabase
-      .from("carrinho")
-      .select("*");
+    // 🔥 CARREGAR CARRINHO
+    async function carregarCarrinho() {
+      const { data, error } = await client
+        .from("carrinho")
+        .select("*");
 
-    if (error) {
-      console.log(error);
-      container.innerHTML = "<p class='vazio'>Erro ao carregar carrinho</p>";
-      return;
+      if (error) {
+        container.innerHTML = "<p class='vazio'>Erro ao carregar carrinho</p>";
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = "<p class='vazio'>Seu carrinho está vazio 🛒</p>";
+        return;
+      }
+
+      render(data);
     }
 
-    if (!data || data.length === 0) {
-      container.innerHTML = "<p class='vazio'>Seu carrinho está vazio 🛒</p>";
-      return;
+    // 🔥 REMOVER ITEM
+    async function removerItem(id) {
+      await client
+        .from("carrinho")
+        .delete()
+        .eq("id", id);
+
+      carregarCarrinho();
     }
 
-    render(data);
-  }
+    // 🔥 LIMPAR CARRINHO
+    async function limparCarrinho() {
+      await client
+        .from("carrinho")
+        .delete()
+        .neq("id", 0);
 
-  // 🔥 remover item
-  async function removerItem(id) {
-    await supabase
-      .from("carrinho")
-      .delete()
-      .eq("id", id);
+      carregarCarrinho();
+    }
 
-    carregarCarrinho();
-  }
+    // 🔥 FINALIZAR COMPRA
+    function finalizarCompra() {
+      alert("Compra finalizada com sucesso! 🎉");
+      limparCarrinho();
+    }
 
-  // 🔥 limpar carrinho
-  async function limparCarrinho() {
-    await supabase
-      .from("carrinho")
-      .delete()
-      .neq("id", 0);
+    // 🔥 RENDER
+    function render(items) {
+      container.innerHTML = "";
 
-    carregarCarrinho();
-  }
+      let total = 0;
 
-  // 🔥 finalizar compra
-  function finalizarCompra() {
-    alert("Compra finalizada com sucesso! 🎉");
-    limparCarrinho();
-  }
+      items.forEach(item => {
+        total += Number(item.preco);
 
-  // 🔥 render da tela
-  function render(items) {
-    container.innerHTML = "";
+        const div = document.createElement("div");
+        div.classList.add("item");
 
-    let total = 0;
+        div.innerHTML = `
+          <div>
+            <strong>${item.nome}</strong><br>
+            R$ ${Number(item.preco).toFixed(2)}
+          </div>
 
-    items.forEach(item => {
-      total += Number(item.preco);
+          <div class="controls">
+            <button onclick="removerItem(${item.id})">🗑</button>
+          </div>
+        `;
 
-      const div = document.createElement("div");
-      div.classList.add("item");
+        container.appendChild(div);
+      });
 
-      div.innerHTML = `
-        <div>
-          <strong>${item.nome}</strong><br>
-          R$ ${Number(item.preco).toFixed(2)}
-        </div>
+      const totalDiv = document.createElement("div");
+      totalDiv.classList.add("total");
+      totalDiv.innerText = "Total: R$ " + total.toFixed(2);
 
-        <div class="controls">
-          <button onclick="removerItem(${item.id})">🗑</button>
-        </div>
+      container.appendChild(totalDiv);
+
+      const actions = document.createElement("div");
+      actions.classList.add("actions");
+
+      actions.innerHTML = `
+        <button class="clear" onclick="limparCarrinho()">Limpar carrinho</button>
+        <button class="buy" onclick="finalizarCompra()">Finalizar compra</button>
       `;
 
-      container.appendChild(div);
-    });
+      container.appendChild(actions);
+    }
 
-    const totalDiv = document.createElement("div");
-    totalDiv.classList.add("total");
-    totalDiv.innerText = "Total: R$ " + total.toFixed(2);
-
-    container.appendChild(totalDiv);
-
-    const actions = document.createElement("div");
-    actions.classList.add("actions");
-
-    actions.innerHTML = `
-      <button class="clear" onclick="limparCarrinho()">Limpar carrinho</button>
-      <button class="buy" onclick="finalizarCompra()">Finalizar compra</button>
-    `;
-
-    container.appendChild(actions);
-  }
-
-  carregarCarrinho();
-</script>
+    carregarCarrinho();
+  </script>
 
 </body>
 </html>
