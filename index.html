@@ -378,59 +378,41 @@
     &copy; 2025 <span>SportZone</span> — Todos os direitos reservados.
   </footer>
 
-  <script>
-    let carrinhoSalvo = JSON.parse(localStorage.getItem("carrinho")) || [];
-  
-    const cartCountEl = document.getElementById("cartCount");
-    const toast = document.getElementById("toast");
-  
-    let toastTimer;
-  
-  // agora sim calcula o total
-    let cartCount = carrinhoSalvo.length;
-    cartCountEl.textContent = cartCount;
-    function showToast(msg) {
-      clearTimeout(toastTimer);
-      toast.textContent = msg;
-      toast.classList.add("show");
-      toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+ <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const supabaseUrl = "https://uelsmyxiynsbrrmacnac.supabase.co";
+
+  const supabaseKey = "SUA_CHAVE_PUBLICA_AQUI"; 
+  // 👉 cole aqui a chave sb_publishable que você pegou
+
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  async function addToCart(nome, preco) {
+    const { error } = await supabase
+      .from("carrinho")
+      .insert([{ nome, preco }]);
+
+    if (error) {
+      console.log("Erro ao salvar:", error);
+      return;
     }
 
-    function addToCart(nome, preco) {
+    alert(nome + " adicionado ao carrinho!");
+  }
 
-      let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+  document.getElementById("botaoBola")
+    .addEventListener("click", () => addToCart("Bola de Futebol", 89.90));
 
-      carrinho.push({
-        nome: nome,
-        preco: preco
-  });
+  document.getElementById("botaoChuteira")
+    .addEventListener("click", () => addToCart("Chuteira", 199.90));
 
-  localStorage.setItem("carrinho", JSON.stringify(carrinho));
+  document.getElementById("botaoRaquete")
+    .addEventListener("click", () => addToCart("Raquete de Tênis", 249.90));
 
-  cartCount++;
-
-  cartCountEl.textContent = cartCount;
-
-  showToast("✅ " + nome + " adicionado ao carrinho!");
-}
-
-document.getElementById("botaoBola")
-  .addEventListener("click", () => addToCart("Bola de Futebol", 89.90));
-
-document.getElementById("botaoChuteira")
-  .addEventListener("click", () => addToCart("Chuteira", 199.90));
-
-document.getElementById("botaoRaquete")
-  .addEventListener("click", () => addToCart("Raquete de Tênis", 249.90));
-
-document.getElementById("botaoBolaTenis")
-  .addEventListener("click", () => addToCart("Bola de Tênis", 34.90));
-
-document.getElementById("cartBtn")
-  .addEventListener("click", () => {
-    window.location.href = "carrinho.html";
-  });
-  </script>
+  document.getElementById("botaoBolaTenis")
+    .addEventListener("click", () => addToCart("Bola de Tênis", 34.90));
+</script>
 
 </body>
 </html>
