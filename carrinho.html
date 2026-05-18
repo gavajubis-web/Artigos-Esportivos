@@ -98,95 +98,107 @@
 
   <div class="container" id="carrinho"></div>
 
-  <script>
-    let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    function salvar() {
-      localStorage.setItem("carrinho", JSON.stringify(carrinho));
-      render();
+<script>
+  const supabaseUrl = "https://uelsmyxiynsbrrmacnac.supabase.co";
+  const supabaseKey = "SUA_CHAVE_PUBLICA_AQUI";
+
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const container = document.getElementById("carrinho");
+
+  // 🔥 carregar carrinho do banco
+  async function carregarCarrinho() {
+    const { data, error } = await supabase
+      .from("carrinho")
+      .select("*");
+
+    if (error) {
+      console.log(error);
+      container.innerHTML = "<p class='vazio'>Erro ao carregar carrinho</p>";
+      return;
     }
 
-    function mudarQtd(index, valor) {
-      carrinho[index].qtd += valor;
-
-      if (carrinho[index].qtd <= 0) {
-        carrinho.splice(index, 1);
-      }
-
-      salvar();
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p class='vazio'>Seu carrinho está vazio 🛒</p>";
+      return;
     }
 
-    function removerItem(index) {
-      carrinho.splice(index, 1);
-      salvar();
-    }
+    render(data);
+  }
 
-    function limparCarrinho() {
-      carrinho = [];
-      salvar();
-    }
+  // 🔥 remover item
+  async function removerItem(id) {
+    await supabase
+      .from("carrinho")
+      .delete()
+      .eq("id", id);
 
-    function finalizarCompra() {
-      alert("Compra finalizada com sucesso! 🎉");
-      limparCarrinho();
-    }
+    carregarCarrinho();
+  }
 
-    function render() {
-      const container = document.getElementById("carrinho");
-      container.innerHTML = "";
+  // 🔥 limpar carrinho
+  async function limparCarrinho() {
+    await supabase
+      .from("carrinho")
+      .delete()
+      .neq("id", 0);
 
-      if (carrinho.length === 0) {
-        container.innerHTML = "<p class='vazio'>Seu carrinho está vazio 🛒</p>";
-        return;
-      }
+    carregarCarrinho();
+  }
 
-      let total = 0;
+  // 🔥 finalizar compra
+  function finalizarCompra() {
+    alert("Compra finalizada com sucesso! 🎉");
+    limparCarrinho();
+  }
 
-      carrinho.forEach((item, index) => {
+  // 🔥 render da tela
+  function render(items) {
+    container.innerHTML = "";
 
-        if (!item.qtd) item.qtd = 1;
+    let total = 0;
 
-        total += item.preco * item.qtd;
+    items.forEach(item => {
+      total += Number(item.preco);
 
-        const div = document.createElement("div");
-        div.classList.add("item");
+      const div = document.createElement("div");
+      div.classList.add("item");
 
-        div.innerHTML = `
-          <div>
-            <strong>${item.nome}</strong><br>
-            R$ ${item.preco.toFixed(2)}
-          </div>
+      div.innerHTML = `
+        <div>
+          <strong>${item.nome}</strong><br>
+          R$ ${Number(item.preco).toFixed(2)}
+        </div>
 
-          <div class="controls">
-            <button onclick="mudarQtd(${index}, -1)">-</button>
-            ${item.qtd}
-            <button onclick="mudarQtd(${index}, 1)">+</button>
-            <button onclick="removerItem(${index})">🗑</button>
-          </div>
-        `;
-
-        container.appendChild(div);
-      });
-
-      const totalDiv = document.createElement("div");
-      totalDiv.classList.add("total");
-      totalDiv.innerText = "Total: R$ " + total.toFixed(2);
-
-      container.appendChild(totalDiv);
-
-      const actions = document.createElement("div");
-      actions.classList.add("actions");
-
-      actions.innerHTML = `
-        <button class="clear" onclick="limparCarrinho()">Limpar carrinho</button>
-        <button class="buy" onclick="finalizarCompra()">Finalizar compra</button>
+        <div class="controls">
+          <button onclick="removerItem(${item.id})">🗑</button>
+        </div>
       `;
 
-      container.appendChild(actions);
-    }
+      container.appendChild(div);
+    });
 
-    render();
-  </script>
+    const totalDiv = document.createElement("div");
+    totalDiv.classList.add("total");
+    totalDiv.innerText = "Total: R$ " + total.toFixed(2);
+
+    container.appendChild(totalDiv);
+
+    const actions = document.createElement("div");
+    actions.classList.add("actions");
+
+    actions.innerHTML = `
+      <button class="clear" onclick="limparCarrinho()">Limpar carrinho</button>
+      <button class="buy" onclick="finalizarCompra()">Finalizar compra</button>
+    `;
+
+    container.appendChild(actions);
+  }
+
+  carregarCarrinho();
+</script>
 
 </body>
 </html>
