@@ -273,168 +273,135 @@
   <footer>&copy; 2025 <span>SportZone</span> — Todos os direitos reservados.</footer>
 
   <!-- ✅ Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://uelsmyxiynsbrrmacnac.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+  const { createClient } = supabase;
+  const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <script>
-    // ✅ CONFIGURAÇÃO SUPABASE
-    const SUPABASE_URL = "https://uelsmyxiynsbrrmacnac.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+  const container = document.getElementById("carrinhoContainer");
+  let usuarioAtual = null;
 
-    const { createClient } = supabase;
-    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+  const toastEl = document.getElementById("toast");
+  let toastTimer;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+  }
 
-    const container = document.getElementById("carrinhoContainer");
+  // Verifica login
+  async function verificarLogin() {
+    const { data } = await client.auth.getSession();
+    if (!data.session) {
+      window.location.href = "login.html";
+      return;
+    }
+    usuarioAtual = data.session.user;
+    await carregarCarrinho();
+  }
 
-    // ── TOAST ──
-    const toastEl = document.getElementById("toast");
-    let toastTimer;
+  async function carregarCarrinho() {
+    container.innerHTML = `<div class="estado"><span class="icone">⏳</span>Carregando carrinho...</div>`;
 
-    function showToast(msg) {
-      clearTimeout(toastTimer);
-      toastEl.textContent = msg;
-      toastEl.classList.add("show");
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+    const { data, error } = await client
+      .from("carrinho")
+      .select("*")
+      .eq("user_id", usuarioAtual.id)
+      .order("id", { ascending: true });
+
+    if (error) {
+      container.innerHTML = `<div class="estado"><span class="icone">❌</span>Erro ao carregar o carrinho.</div>`;
+      return;
     }
 
-    // ── CARREGAR CARRINHO ──
-    async function carregarCarrinho() {
-      container.innerHTML = `<div class="estado"><span class="icone">⏳</span>Carregando carrinho...</div>`;
-
-      const { data, error } = await client
-        .from("carrinho")
-        .select("*")
-        .order("id", { ascending: true });
-
-      if (error) {
-        console.error("Erro ao carregar carrinho:", error);
-        container.innerHTML = `<div class="estado"><span class="icone">❌</span>Erro ao carregar o carrinho.<br>Verifique sua conexão.</div>`;
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="estado"><span class="icone">🛒</span>Seu carrinho está vazio.<br><a href="index.html" style="color:#e63c00;text-decoration:none;font-weight:700;">Ver produtos →</a></div>`;
-        return;
-      }
-
-      renderCarrinho(data);
+    if (!data || data.length === 0) {
+      container.innerHTML = `<div class="estado"><span class="icone">🛒</span>Seu carrinho está vazio.<br><a href="index.html" style="color:#e63c00;text-decoration:none;font-weight:700;">Ver produtos →</a></div>`;
+      return;
     }
 
-    // ── RENDERIZAR ITENS ──
-    function renderCarrinho(items) {
-      container.innerHTML = "";
+    renderCarrinho(data);
+  }
 
-      let total = 0;
+  function renderCarrinho(items) {
+    container.innerHTML = "";
+    let total = 0;
 
-      items.forEach(item => {
-        total += Number(item.preco);
-
-        const div = document.createElement("div");
-        div.classList.add("item");
-        div.id = "item-" + item.id;
-
-        div.innerHTML = `
-          <div class="item-info">
-            <strong>${item.nome}</strong>
-            <span class="preco">R$ ${Number(item.preco).toFixed(2).replace(".", ",")}</span>
-          </div>
-          <button class="btn-remover" onclick="removerItem(${item.id})" title="Remover item">🗑</button>
-        `;
-
-        container.appendChild(div);
-      });
-
-      // ── TOTAL ──
-      const totalBox = document.createElement("div");
-      totalBox.classList.add("total-box");
-      totalBox.id = "totalBox";
-      totalBox.innerHTML = `
-        <span>Total (${items.length} item${items.length > 1 ? "s" : ""})</span>
-        <span class="total-valor">R$ ${total.toFixed(2).replace(".", ",")}</span>
+    items.forEach(item => {
+      total += Number(item.preco);
+      const div = document.createElement("div");
+      div.classList.add("item");
+      div.id = "item-" + item.id;
+      div.innerHTML = `
+        <div class="item-info">
+          <strong>${item.nome}</strong>
+          <span class="preco">R$ ${Number(item.preco).toFixed(2).replace(".", ",")}</span>
+        </div>
+        <button class="btn-remover" onclick="removerItem(${item.id})">🗑</button>
       `;
-      container.appendChild(totalBox);
+      container.appendChild(div);
+    });
 
-      // ── AÇÕES ──
-      const acoes = document.createElement("div");
-      acoes.classList.add("acoes");
-      acoes.id = "acoes";
-      acoes.innerHTML = `
-        <button class="btn-limpar" id="btnLimpar" onclick="limparCarrinho()">🗑 Limpar carrinho</button>
-        <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarCompra()">✅ Finalizar compra</button>
-      `;
-      container.appendChild(acoes);
+    const totalBox = document.createElement("div");
+    totalBox.classList.add("total-box");
+    totalBox.innerHTML = `
+      <span>Total (${items.length} item${items.length > 1 ? "s" : ""})</span>
+      <span class="total-valor">R$ ${total.toFixed(2).replace(".", ",")}</span>
+    `;
+    container.appendChild(totalBox);
+
+    const acoes = document.createElement("div");
+    acoes.classList.add("acoes");
+    acoes.id = "acoes";
+    acoes.innerHTML = `
+      <button class="btn-limpar" id="btnLimpar" onclick="limparCarrinho()">🗑 Limpar carrinho</button>
+      <button class="btn-finalizar" id="btnFinalizar" onclick="finalizarCompra()">✅ Finalizar compra</button>
+    `;
+    container.appendChild(acoes);
+  }
+
+  async function removerItem(id) {
+    const btn = document.querySelector(`#item-${id} .btn-remover`);
+    if (btn) btn.disabled = true;
+
+    const { error } = await client.from("carrinho").delete().eq("id", id).eq("user_id", usuarioAtual.id);
+
+    if (error) { showToast("❌ Erro ao remover item."); if (btn) btn.disabled = false; return; }
+    showToast("🗑 Item removido.");
+    await carregarCarrinho();
+  }
+
+  async function limparCarrinho() {
+    document.getElementById("btnLimpar").disabled = true;
+
+    const { error } = await client.from("carrinho").delete().eq("user_id", usuarioAtual.id);
+
+    if (error) { showToast("❌ Erro ao limpar carrinho."); return; }
+    showToast("🗑 Carrinho limpo.");
+    await carregarCarrinho();
+  }
+
+  async function finalizarCompra() {
+    const btnF = document.getElementById("btnFinalizar");
+    btnF.disabled = true;
+    btnF.textContent = "Processando...";
+
+    const { error } = await client.from("carrinho").delete().eq("user_id", usuarioAtual.id);
+
+    if (error) {
+      showToast("❌ Erro ao finalizar. Tente novamente.");
+      btnF.disabled = false;
+      btnF.textContent = "✅ Finalizar compra";
+      return;
     }
 
-    // ── REMOVER ITEM ──
-    async function removerItem(id) {
-      const btn = document.querySelector(`#item-${id} .btn-remover`);
-      if (btn) btn.disabled = true;
+    showToast("🎉 Compra finalizada com sucesso!");
+    setTimeout(() => carregarCarrinho(), 1500);
+  }
 
-      const { error } = await client
-        .from("carrinho")
-        .delete()
-        .eq("id", id);
-
-      if (error) {
-        console.error("Erro ao remover item:", error);
-        showToast("❌ Erro ao remover item.");
-        if (btn) btn.disabled = false;
-        return;
-      }
-
-      showToast("🗑 Item removido.");
-      await carregarCarrinho();
-    }
-
-    // ── LIMPAR CARRINHO ──
-    async function limparCarrinho() {
-      const btn = document.getElementById("btnLimpar");
-      if (btn) btn.disabled = true;
-
-      // Deleta todos os registros da tabela
-      const { error } = await client
-        .from("carrinho")
-        .delete()
-        .gte("id", 0);
-
-      if (error) {
-        console.error("Erro ao limpar carrinho:", error);
-        showToast("❌ Erro ao limpar carrinho.");
-        if (btn) btn.disabled = false;
-        return;
-      }
-
-      showToast("🗑 Carrinho limpo.");
-      await carregarCarrinho();
-    }
-
-    // ── FINALIZAR COMPRA ──
-    async function finalizarCompra() {
-      const btnF = document.getElementById("btnFinalizar");
-      const btnL = document.getElementById("btnLimpar");
-      if (btnF) btnF.disabled = true;
-      if (btnL) btnL.disabled = true;
-      if (btnF) btnF.textContent = "Processando...";
-
-      const { error } = await client
-        .from("carrinho")
-        .delete()
-        .gte("id", 0);
-
-      if (error) {
-        console.error("Erro ao finalizar compra:", error);
-        showToast("❌ Erro ao finalizar. Tente novamente.");
-        if (btnF) { btnF.disabled = false; btnF.textContent = "✅ Finalizar compra"; }
-        if (btnL) btnL.disabled = false;
-        return;
-      }
-
-      showToast("🎉 Compra finalizada com sucesso!");
-      setTimeout(() => carregarCarrinho(), 1500);
-    }
-
-    // ── INICIAR ──
-    carregarCarrinho();
-  </script>
-
+  verificarLogin();
+</script>
 </body>
 </html>
