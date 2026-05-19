@@ -393,87 +393,76 @@
   </footer>
 
   <!-- ✅ Supabase SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = "https://uelsmyxiynsbrrmacnac.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+  const { createClient } = supabase;
+  const client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  <script>
-    // ✅ CONFIGURAÇÃO SUPABASE — variáveis corretas
-    const SUPABASE_URL = "https://uelsmyxiynsbrrmacnac.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_mM1iJ-wcjqb3-W6jVpbXtg_ab1Kv3JO";
+  let usuarioAtual = null;
 
-    const { createClient } = supabase;
-    const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Verifica se está logado
+  async function verificarLogin() {
+    const { data } = await client.auth.getSession();
+    if (!data.session) {
+      window.location.href = "login.html";
+      return;
+    }
+    usuarioAtual = data.session.user;
+    await atualizarContador();
+  }
 
-    // ── TOAST ──
-    const toastEl = document.getElementById("toast");
-    let toastTimer;
+  // Toast
+  const toastEl = document.getElementById("toast");
+  let toastTimer;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+  }
 
-    function showToast(msg) {
-      clearTimeout(toastTimer);
-      toastEl.textContent = msg;
-      toastEl.classList.add("show");
-      toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2800);
+  // Contador
+  async function atualizarContador() {
+    const { count } = await client
+      .from("carrinho")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", usuarioAtual.id);
+    document.getElementById("cartCount").textContent = count ?? 0;
+  }
+
+  // Adicionar ao carrinho
+  async function addToCart(btn, nome, preco) {
+    btn.disabled = true;
+    btn.textContent = "Adicionando...";
+
+    const { error } = await client
+      .from("carrinho")
+      .insert([{ nome, preco, user_id: usuarioAtual.id }]);
+
+    if (error) {
+      showToast("❌ Erro ao adicionar. Tente novamente.");
+    } else {
+      showToast("✅ " + nome + " adicionado ao carrinho!");
+      await atualizarContador();
     }
 
-    // ── CONTADOR DO CARRINHO (busca do Supabase ao carregar a página) ──
-    async function atualizarContador() {
-      try {
-        const { count, error } = await client
-          .from("carrinho")
-          .select("*", { count: "exact", head: true });
+    btn.disabled = false;
+    btn.textContent = "Comprar";
+  }
 
-        if (!error) {
-          document.getElementById("cartCount").textContent = count ?? 0;
-        }
-      } catch (e) {
-        console.warn("Não foi possível buscar contador:", e);
-      }
-    }
+  document.getElementById("botaoBola")
+    .addEventListener("click", function () { addToCart(this, "Bola de Futebol", 89.90); });
+  document.getElementById("botaoChuteira")
+    .addEventListener("click", function () { addToCart(this, "Chuteira", 199.90); });
+  document.getElementById("botaoRaquete")
+    .addEventListener("click", function () { addToCart(this, "Raquete de Tênis", 249.90); });
+  document.getElementById("botaoBolaTenis")
+    .addEventListener("click", function () { addToCart(this, "Bola de Tênis", 34.90); });
 
-    // ── ADICIONAR AO CARRINHO ──
-    async function addToCart(btn, nome, preco) {
-      btn.disabled = true;
-      btn.textContent = "Adicionando...";
-
-      const { error } = await client
-        .from("carrinho")
-        .insert([{ nome, preco }]);
-
-      if (error) {
-        console.error("Erro ao salvar no carrinho:", error);
-        showToast("❌ Erro ao adicionar. Tente novamente.");
-      } else {
-        showToast("✅ " + nome + " adicionado ao carrinho!");
-        await atualizarContador();
-      }
-
-      btn.disabled = false;
-      btn.textContent = "Comprar";
-    }
-
-    // ── EVENTOS DOS BOTÕES ──
-    document.getElementById("botaoBola")
-      .addEventListener("click", function () {
-        addToCart(this, "Bola de Futebol", 89.90);
-      });
-
-    document.getElementById("botaoChuteira")
-      .addEventListener("click", function () {
-        addToCart(this, "Chuteira", 199.90);
-      });
-
-    document.getElementById("botaoRaquete")
-      .addEventListener("click", function () {
-        addToCart(this, "Raquete de Tênis", 249.90);
-      });
-
-    document.getElementById("botaoBolaTenis")
-      .addEventListener("click", function () {
-        addToCart(this, "Bola de Tênis", 34.90);
-      });
-
-    // ── Carrega contador ao abrir a página ──
-    atualizarContador();
-  </script>
+  verificarLogin();
+</script>
 
 </body>
 </html>
